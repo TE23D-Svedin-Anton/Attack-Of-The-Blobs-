@@ -29,6 +29,15 @@ void Draw()
     }
 }
 
+void UpdateMovement()
+{
+    for (int i = 0; i < rectangles.Count; i++)
+    {
+        RectAttacker rect = rectangles[i];
+        rect.Rect.X += rect.Speed;
+    }
+}
+
 Raylib.InitWindow(1000,500, "Attack Of The Blobs!");
 
 Raylib.SetTargetFPS(60);
@@ -41,5 +50,6 @@ while(Raylib.WindowShouldClose() == false)
     Raylib.ClearBackground(Blue); 
     SpawnButton();
     Draw();
+    UpdateMovement();
     Raylib.EndDrawing();
 } 
