@@ -7,12 +7,14 @@ float CooldownTime = 2.0f;
 float PlrLastTimeSpawned = 0.0f;
 float EnemyLastTimeSpawned = 0.0f;
 
-List<RectAttacker> PlrRectangles = [];
-List<TriAttacker> PlrTriangles = [];
 List<CircAttacker> PlrCircles = [];
-List<RectAttacker> EnemyRectangles = [];
-List<TriAttacker> EnemyTriangles = [];
 List<CircAttacker> EnemyCircles = [];
+List<CircAttacker> EnemyCirHitbox =[];
+List<TriAttacker> PlrTriangles = [];
+List<TriAttacker> EnemyTriangles = [];
+List<TriAttacker> EnemyTriHitbox =[];
+List<RectAttacker> PlrRectangles = [];
+List<RectAttacker> EnemyRectangles = [];
 
 void SpawnButton() //Skapar en anfallare beroende på vilken knapp som trycks
 {
@@ -31,6 +33,7 @@ void SpawnButton() //Skapar en anfallare beroende på vilken knapp som trycks
     if(Raylib.IsKeyPressed(KeyboardKey.Eight) && ((float)Raylib.GetTime() - EnemyLastTimeSpawned >= CooldownTime))
     {
         EnemyCircles.Add(new CircAttacker() {Position = EnemyCircSpawn}); //Skapar en ny Rektangel i rectangles listan
+        EnemyCirHitbox.Add(new CircAttacker () {Hitbox = new Rectangle(EnemySpawnX - 40, SpawnY - 40,80,80) });
         EnemyLastTimeSpawned = (float)Raylib.GetTime();   
     }
 
@@ -43,6 +46,7 @@ void SpawnButton() //Skapar en anfallare beroende på vilken knapp som trycks
     if(Raylib.IsKeyPressed(KeyboardKey.Nine) && ((float)Raylib.GetTime() - EnemyLastTimeSpawned >= CooldownTime))
     {
         EnemyTriangles.Add(new TriAttacker() {Position = new Vector2(EnemySpawnX, SpawnY - 40)}); //Skapar en ny Rektangel i rectangles listan
+        EnemyTriHitbox.Add(new TriAttacker () {Hitbox = new Rectangle(EnemySpawnX - 40, SpawnY - 40,80,80) });
         EnemyLastTimeSpawned = (float)Raylib.GetTime();   
     }
 
@@ -71,8 +75,11 @@ void Draw() //Ritar alla spelarens och motståndarens anfallare som har skapats
     for (int i = 0; i < EnemyCircles.Count; i++)
     {
         CircAttacker center = EnemyCircles[i];
+        CircAttacker Hit = EnemyCirHitbox[i];
         Raylib.DrawCircleV(center.Position, center.radius, Color.Black);
         Raylib.DrawCircleV(center.Position, center.radius - 4, Color.Blue);
+        Raylib.DrawRectangleRec(Hit.Hitbox, new Color(255,255,255,0));
+        Raylib.DrawRectangleLinesEx(Hit.Hitbox, 4, Color.Black);
     }
      
     for (int i = 0; i < PlrTriangles.Count; i++)
@@ -89,12 +96,15 @@ void Draw() //Ritar alla spelarens och motståndarens anfallare som har skapats
     for (int i = 0; i < EnemyTriangles.Count; i++)
     {
         TriAttacker tri = EnemyTriangles[i];
+        TriAttacker Hit = EnemyTriHitbox[i];
         Vector2 p1 = tri.Position;
         Vector2 p2 = new Vector2(tri.Position.X - tri.Size / 2, tri.Position.Y + tri.Size);
         Vector2 p3 = new Vector2(tri.Position.X + tri.Size / 2, tri.Position.Y + tri.Size);
 
         Raylib.DrawTriangle(p1, p2, p3, Color.Black);
         Raylib.DrawTriangle(p1 + new Vector2(0,8), p2 + new Vector2(6,-4), p3 - new Vector2(6,4), Color.Green);
+        Raylib.DrawRectangleRec(Hit.Hitbox, new Color(255,255,255,0));
+        Raylib.DrawRectangleLinesEx(Hit.Hitbox, 4, Color.Black);
     }
 
      for (int i = 0; i < PlrRectangles.Count; i++)
@@ -129,9 +139,11 @@ void UpdateMovement() //Method som flyttar anfallarna mot motståndarens bas
     for (int i = 0; i < EnemyCircles.Count; i++)
     {
         CircAttacker center = EnemyCircles[i];
+        CircAttacker Hit = EnemyCirHitbox[i];
          if(center.Position.X - center.radius > 0)
         {
             center.Position.X -= center.Speed;
+            Hit.Hitbox.X -= center.Speed;
         }else
         {
             center.Speed = 0;
@@ -153,9 +165,11 @@ void UpdateMovement() //Method som flyttar anfallarna mot motståndarens bas
     for (int i = 0; i < EnemyTriangles.Count; i++)
     {
         TriAttacker tri = EnemyTriangles[i];
+        TriAttacker Hit = EnemyTriHitbox[i];
          if(tri.Position.X - tri.Size/2> 0)
         {
         tri.Position.X -= tri.Speed;
+        Hit.Hitbox.X -= tri.Speed;
         } else
         {
             tri.Speed = 0;
@@ -173,6 +187,37 @@ void UpdateMovement() //Method som flyttar anfallarna mot motståndarens bas
             rect.Speed = 0;
         }
 
+        for(int j = 0; j < EnemyRectangles.Count; j++)
+        {
+            RectAttacker EnemyRect = EnemyRectangles[j];
+            if(Raylib.CheckCollisionRecs(rect.Rect, EnemyRect. Rect))
+            {
+                rect.Speed = 0;
+                EnemyRect.Speed = 0;
+            }
+        }
+
+        for(int o = 0; o < EnemyCircles.Count; o++)
+        {
+            CircAttacker EnemyCenter = EnemyCircles[o];
+            CircAttacker EnemyCenterHit = EnemyCirHitbox[o];
+            if(Raylib.CheckCollisionRecs(rect.Rect, EnemyCenterHit.Hitbox))
+            {
+                rect.Speed = 0;
+                EnemyCenter.Speed = 0;
+            }
+        }
+
+        for(int t = 0; t < EnemyTriangles.Count; t++)
+        {
+            TriAttacker EnemyPosition = EnemyTriangles[t];
+            TriAttacker EnemyPositionHit = EnemyTriHitbox[t];
+            if(Raylib.CheckCollisionRecs(rect.Rect, EnemyPositionHit.Hitbox))
+            {
+                rect.Speed = 0;
+                EnemyPosition.Speed = 0;
+            }
+        }
     }
 
     for (int i = 0; i < EnemyRectangles.Count; i++)

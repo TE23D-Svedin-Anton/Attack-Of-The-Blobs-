@@ -8,6 +8,7 @@ using Raylib_cs;
     public class CircAttacker
     {
     public Vector2 Position;
+    public Raylib_cs.Rectangle Hitbox; 
     public int radius = 40;
     public float Speed = +2.0f;
     }
@@ -15,6 +16,7 @@ using Raylib_cs;
     public class TriAttacker
     {
         public Vector2 Position;
+        public Raylib_cs.Rectangle Hitbox; 
         public int Size = 80;
 
         public float Speed = +0.8f;
