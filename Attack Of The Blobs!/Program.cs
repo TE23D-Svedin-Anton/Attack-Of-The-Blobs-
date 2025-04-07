@@ -12,9 +12,9 @@
     float PlrCircLastTimeAttacked = 0.0f;
     float PlrTriLastTimeAttacked = 0.0f;
     float PlrRectLastTimeAttacked = 0.0f;
-    float EnemyCircLastAttacked = 0.0f;
-    float EnemyTriLastAttacked = 0.0f;
-    float EnemyRectLastAttacked = 0.0f;
+    float EnemyCircLastTimeAttacked = 0.0f;
+    float EnemyTriLastTimeAttacked = 0.0f;
+    float EnemyRectLastTimeAttacked = 0.0f;
 
 
     List<TriAttacker> PlrTriangles =[];
@@ -33,7 +33,6 @@
         if(Raylib.IsKeyPressed(KeyboardKey.Two) && ((float)Raylib.GetTime() - PlrLastTimeSpawned >= SpawnCooldownTime))
         {
             PlrTriangles.Add(new TriAttacker () {Hitbox = new Rectangle(PlrSpawnX - 200, SpawnY - 40,400,80) });//Skapar en ny Triangel i PlrTriangles listan
-            PlrTriangles.Add(new TriAttacker () {PlayerHitbox = new Rectangle(PlrSpawnX - 80, SpawnY - 40,80,80) });//Skapar en ny Triangel i PlrTriangles listan
             PlrLastTimeSpawned = (float)Raylib.GetTime();   
         }
 
@@ -140,13 +139,14 @@
         for (int A = 0; A < PlrTriangles.Count; A++)
         {
             TriAttacker PlrTri = PlrTriangles[A];
+            Rectangle PlayerHitBox = new Rectangle(PlrTri.PlayerHitbox.X - 40, PlrTri.Hitbox.Y,400,80);
             if (PlrTri.Hp <= 0)
             {
                 PlrTriangles.RemoveAt(A);
                 A--;
                 }
 
-            if(PlrTri.Hitbox.X + PlrTri.Size*2 < 1500)
+            if(PlrTri.Hitbox.X + 400 <= 1500)
             {
             PlrTri.Hitbox.X += PlrTri.Speed;
             } else
@@ -157,9 +157,14 @@
             for(int a = 0; a < EnemyTriangles.Count; a++)
             {
                 TriAttacker EnemyTri = EnemyTriangles[a];
-                if(Raylib.CheckCollisionRecs(PlrTri.Hitbox, EnemyTri.Hitbox))
+                if(Raylib.CheckCollisionRecs(PlayerHitBox, EnemyTri.Hitbox))
                 {
                     PlrTri.Speed = 0;
+                    if(Raylib.GetTime() - EnemyTriLastTimeAttacked >= TriAttackCooldownTime)
+                    {
+                    PlrTri.Hp -= 30;
+                    EnemyTriLastTimeAttacked = (float)Raylib.GetTime(); 
+                    }
                 }
             }
 
@@ -190,10 +195,12 @@
                 EnemyTriangles.RemoveAt(a);
                 a--;
                 }
-            if(EnemyTri.Hitbox.X - EnemyTri.Size > 0)
+            if(EnemyTri.Hitbox.X >= 0)
             {
+            EnemyTri.Speed = 1;
             EnemyTri.Hitbox.X -= EnemyTri.Speed;
-            } else
+            } 
+            else
             {
                 EnemyTri.Speed = 0;
             }
@@ -204,6 +211,15 @@
                 if(Raylib.CheckCollisionRecs(EnemyTri.Hitbox, PlrTri.Hitbox))
                 {
                     EnemyTri.Speed = 0;
+                    if(Raylib.GetTime() - PlrTriLastTimeAttacked >= TriAttackCooldownTime)
+                    {
+                    EnemyTri.Hp -= 30;
+                    PlrTriLastTimeAttacked = (float)Raylib.GetTime(); 
+                    }
+                }
+                else
+                {
+                    EnemyTri.Speed = 1;
                 }
             }
 
@@ -234,7 +250,7 @@
         PlrCircles.RemoveAt(B);
         B--;
         }
-        else if(PlrCirc.Hp > 0 && PlrCirc.Hitbox.X + PlrCirc.radius*2 < 1500)
+        else if(PlrCirc.Hp > 0 && PlrCirc.Hitbox.X + PlrCirc.radius*2 <= 1500)
         {
             PlrCirc.Hitbox.X += PlrCirc.Speed;
             }
@@ -279,7 +295,7 @@
         EnemyCircles.RemoveAt(b);
         b--;
         }
-        else if(EnemyCirc.Hp > 0 && EnemyCirc.Hitbox.X - EnemyCirc.radius*2 > 0)
+        else if(EnemyCirc.Hp > 0 && EnemyCirc.Hitbox.X - EnemyCirc.radius*2 >= 0)
         {
             EnemyCirc.Hitbox.X -= EnemyCirc.Speed;
             }
@@ -324,7 +340,7 @@
         PlrRectangles.RemoveAt(C);
         C--;
         }
-        else if(PlrRect.Hp > 0 && PlrRect.Rect.X - PlrRect.Rect.Width <= 1500)
+        else if(PlrRect.Hp > 0 && PlrRect.Rect.X + PlrRect.Rect.Width <= 1500)
         {
             PlrRect.Rect.X += PlrRect.Speed;
             }
@@ -375,7 +391,7 @@
             }
             else
             {
-                EnemyRect.Speed = 0;
+                EnemyRect.Speed = 0;    
             }
 
             for(int A = 0; A < PlrTriangles.Count; A++)

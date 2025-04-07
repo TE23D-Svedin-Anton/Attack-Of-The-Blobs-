@@ -11,7 +11,7 @@ using Raylib_cs;
         
         public int Size = 80;
 
-        public float Speed = 0f;
+        public float Speed = 1f;
         public int Hp = 100;
     }
 
@@ -21,7 +21,7 @@ using Raylib_cs;
     public Raylib_cs.Rectangle Hitbox; 
     
     public int radius = 40;
-    public float Speed = 0f;
+    public float Speed = 1.2f;
     public string HpText;
     public int Hp = 80;
     }
@@ -29,6 +29,6 @@ using Raylib_cs;
      public class RectAttacker
     {
         public Raylib_cs.Rectangle Rect;
-        public float Speed = 0f;
+        public float Speed = 0.8f;
         public int Hp = 120;
     }
